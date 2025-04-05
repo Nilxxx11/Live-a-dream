@@ -4,7 +4,7 @@ const paseos = [
     descripcionCorta: 'Descubre playas paradisíacas y relájate con el sonido del mar.',
     descripcionLarga: 'Disfruta de un día completo en la playa con transporte, alimentación y guía incluido.',
     imagen: 'tour1.jpg',
-    precio: '$100.000'
+    precio: '$80.000'
   },
   {
     titulo: 'Chiva Rumbera',
@@ -12,6 +12,13 @@ const paseos = [
     descripcionLarga: 'Incluye guía profesional, hidratación y seguro de viaje.',
     imagen: 'tour2.jpg',
     precio: '$120.000'
+  },
+  {
+    titulo: 'Panoramico islas rosario',
+    descripcionCorta: 'Vive la experiencia de las islas del rosario.',
+    descripcionLarga: 'Incluye guía profesional, almuerazo, amacas....',
+    imagen: 'tour3.jpg',
+    precio: '$220.000'
   },
   {
     titulo: 'Panoramico islas rosario',
