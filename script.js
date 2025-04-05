@@ -25,7 +25,6 @@ function renderPaseos() {
     section.innerHTML = `
       <img src="${paseo.imagen}" alt="${paseo.titulo}">
       <section class="video-section">
-  <h2>Descubre la experiencia</h2>
   <iframe width="100%" height="400" style="max-width: 800px; border-radius: 10px;"
     src="https://www.youtube.com/embed/VIDEO_ID"
     title="Video de presentación"
