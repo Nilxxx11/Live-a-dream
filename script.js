@@ -12,6 +12,13 @@ const paseos = [
     descripcionLarga: 'Incluye guía profesional, hidratación y seguro de viaje.',
     imagen: 'tour2.jpg',
     precio: '$120.000'
+  },
+  {
+    titulo: 'Chiva Rumbera',
+    descripcionCorta: 'Vive la experiencia de la rumba Cartagenera.',
+    descripcionLarga: 'Incluye guía profesional, hidratación y seguro de viaje.',
+    imagen: 'tour2.jpg',
+    precio: '$120.000'
   }
 ];
 
