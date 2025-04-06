@@ -38,15 +38,6 @@ function renderPaseos() {
     section.className = 'paseo';
     section.innerHTML = `
       <img src="${paseo.imagen}" alt="${paseo.titulo}">
-      <section class="video-section">
-  <iframe width="100%" height="400" style="max-width: 800px; border-radius: 10px;"
-    src="https://www.youtube.com/embed/VIDEO_ID"
-    title="Video de presentación"
-    frameborder="0"
-    allowfullscreen>
-  </iframe>
-</section>
-
       <h2>${paseo.titulo}</h2>
       <p>${paseo.descripcionCorta}</p>
       <button onclick="abrirModal('${paseo.titulo}', '${paseo.descripcionLarga}', '${paseo.imagen}', '${paseo.precio}')">Ver más</button>
