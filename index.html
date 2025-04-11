@@ -99,7 +99,7 @@ const firebaseConfig = {
 
     function iniciarSesion() {
       const clave = document.getElementById("claveAdmin").value.trim();
-      if (clave === "1234") {
+      if (clave === "&admin") {
         admin = true;
         cerrarModal();
         document.getElementById("formulario").style.display = "block";
