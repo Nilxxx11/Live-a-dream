@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <img src="LOGO.png" alt="Logo" style="max-width: 200px; height: auto; display: block; margin-bottom: 1rem;">
+
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #5b80f8; }
+    .container { max-width: 700px; margin: auto; background: white; padding: 1rem; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
+    input, textarea { width: 100%; margin-bottom: 1rem; padding: .5rem; border: 1px solid #ccc; border-radius: 5px; }
+    button { padding: .5rem 1rem; border: none; background: #77a342; color: white; border-radius: 5px; cursor: pointer; margin-right: 0.5rem; }
+    .card { margin-top: 1rem; border: 1px solid #ccc; border-radius: 10px; overflow: hidden; }
+    .card img { width: 100%; height: 200px; object-fit: cover; }
+    .card iframe { width: 100%; height: 250px; border: none; margin-top: 1rem; }
+    .card-content { padding: 1rem; }
+    .admin-controls { margin-top: 1rem; }
+    .error { background: #ffdddd; color: #a00; padding: 0.5rem; margin-bottom: 1rem; border: 1px solid #a00; border-radius: 5px; }
+
+    /* Modal */
+    .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
+    .modal-content {
+      background: white; margin: 15% auto; padding: 20px; border-radius: 10px;
+      width: 90%; max-width: 400px; position: relative;
+    }
+    .close { position: absolute; top: 10px; right: 15px; font-size: 20px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button onclick="abrirModal()">Login</button>
+
+    <div id="formulario" style="display:none;">
+      <div id="mensajeError" class="error" style="display:none;"></div>
+      <input type="text" id="titulo" placeholder="Título" />
+      <textarea id="descripcionCorta" placeholder="Descripción corta"></textarea>
+      <textarea id="descripcionLarga" placeholder="Descripción larga"></textarea>
+      <input type="text" id="imagen" placeholder="URL de la imagen" />
+      <input type="text" id="video" placeholder="URL de video de YouTube (opcional)" />
+      <button onclick="guardarPasadia()">Guardar</button>
+    </div>
+
+    <div id="pasadiasContainer"></div>
+  </div>
+
+  <!-- Modal de login -->
+  <div id="modalLogin" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="cerrarModal()">&times;</span>
+      <h3>Ingreso Administrador</h3>
+      <input type="password" id="claveAdmin" placeholder="Clave de administrador" />
+      <button onclick="iniciarSesion()">Ingresar</button>
+      <div id="modalError" class="error" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <script>
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCfJiBkzwaLdoSpQDHU3rCgfC4nMr58hUk",
+  authDomain: "paginaweb-d1886.firebaseapp.com",
+  databaseURL: "https://paginaweb-d1886-default-rtdb.firebaseio.com",
+  projectId: "paginaweb-d1886",
+  storageBucket: "paginaweb-d1886.firebasestorage.app",
+  messagingSenderId: "430619803153",
+  appId: "1:430619803153:web:1fbada3c7fb6ca45a07bb0",
+  measurementId: "G-BYJ5RVSZ92"
+};
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let admin = false;
+    let idEdicion = null;
+
+    function mostrarError(msg, contenedor = "mensajeError") {
+      const div = document.getElementById(contenedor);
+      div.style.display = "block";
+      div.textContent = msg;
+    }
+
+    function limpiarError(contenedor = "mensajeError") {
+      document.getElementById(contenedor).style.display = "none";
+    }
+
+    function abrirModal() {
+      document.getElementById("modalLogin").style.display = "block";
+    }
+
+    function cerrarModal() {
+      document.getElementById("modalLogin").style.display = "none";
+      limpiarError("modalError");
+      document.getElementById("claveAdmin").value = "";
+    }
+
+    function iniciarSesion() {
+      const clave = document.getElementById("claveAdmin").value.trim();
+      if (clave === "1234") {
+        admin = true;
+        cerrarModal();
+        document.getElementById("formulario").style.display = "block";
+        mostrarPasadias();
+      } else {
+        mostrarError("Clave incorrecta", "modalError");
+      }
+    }
+
+    function guardarPasadia() {
+      limpiarError();
+
+      const titulo = document.getElementById("titulo").value.trim();
+      const descripcionCorta = document.getElementById("descripcionCorta").value.trim();
+      const descripcionLarga = document.getElementById("descripcionLarga").value.trim();
+      const imagen = document.getElementById("imagen").value.trim();
+      const video = document.getElementById("video").value.trim();
+
+      if (!titulo || !descripcionCorta || !descripcionLarga || !imagen) {
+        mostrarError("Todos los campos excepto el video son obligatorios.");
+        return;
+      }
+
+      const datos = { titulo, descripcionCorta, descripcionLarga, imagen, video };
+
+      if (idEdicion) {
+        db.ref("pasadias/" + idEdicion).set(datos, (error) => {
+          if (error) mostrarError("Error al actualizar: " + error.message);
+          else limpiarFormulario();
+        });
+      } else {
+        db.ref("pasadias").push(datos, (error) => {
+          if (error) mostrarError("Error al guardar: " + error.message);
+          else limpiarFormulario();
+        });
+      }
+    }
+
+    function limpiarFormulario() {
+      idEdicion = null;
+      document.getElementById("titulo").value = "";
+      document.getElementById("descripcionCorta").value = "";
+      document.getElementById("descripcionLarga").value = "";
+      document.getElementById("imagen").value = "";
+      document.getElementById("video").value = "";
+    }
+
+    function getEmbedURL(url) {
+      const regExp = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([\w-]{11})/;
+      const match = url.match(regExp);
+      return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+    }
+
+    function editarPasadia(id, datos) {
+      idEdicion = id;
+      document.getElementById("titulo").value = datos.titulo;
+      document.getElementById("descripcionCorta").value = datos.descripcionCorta;
+      document.getElementById("descripcionLarga").value = datos.descripcionLarga;
+      document.getElementById("imagen").value = datos.imagen;
+      document.getElementById("video").value = datos.video;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function eliminarPasadia(id) {
+      if (confirm("¿Eliminar este pasadía?")) {
+        db.ref("pasadias/" + id).remove();
+      }
+    }
+
+    function mostrarPasadias() {
+      const contenedor = document.getElementById("pasadiasContainer");
+      db.ref("pasadias").on("value", snapshot => {
+        contenedor.innerHTML = "";
+        snapshot.forEach(child => {
+          const id = child.key;
+          const p = child.val();
+          const videoEmbed = p.video ? `<iframe src="${getEmbedURL(p.video)}" allowfullscreen></iframe>` : "";
+
+const controlesAdmin = admin
+  ? `<div class="admin-controls">
+      <button onclick='editarPasadia("${id}", ${JSON.stringify(p)})'>Editar</button>
+      <button onclick='eliminarPasadia("${id}")'>Eliminar</button>
+     </div>` : "";
+
+contenedor.innerHTML += `
+  <div class="card">
+    <img src="${p.imagen}" alt="${p.titulo}" />
+    <div class="card-content">
+      <h3>${p.titulo}</h3>
+      <p>${p.descripcionCorta}</p>
+      <details>
+        <summary>Ver más</summary>
+        <p>${p.descripcionLarga}</p>
+        <a href="https://wa.me/573017743786?text=Hola!%20Estoy%20interesado%20en%20el%20pasadía:%20${encodeURIComponent(p.titulo)}" 
+           target="_blank">
+           <button>Reservar por WhatsApp</button>
+        </a>
+      </details>
+      ${videoEmbed}
+      ${controlesAdmin}
+    </div>
+  </div>
+`;
+
+        });
+      });
+    }
+
+    mostrarPasadias();
+  </script>
+</body>
+</html>
